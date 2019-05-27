@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="100dp"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_margin="15dp">
+
+    <ImageView
+        android:id="@+id/iv_head"
+        android:layout_width="100dp"
+        android:layout_height="141dp"
+        android:scaleType="fitXY"
+        />
+
+    <TextView
+        android:id="@+id/iv_tail"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/iv_head"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:ellipsize="end"
+        android:minLines="2"
+        android:maxLines="2"/>
+
+    <com.beardedhen.androidbootstrap.BootstrapButton
+        android:id="@+id/follow"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:text="Follow"
+        android:layout_below="@id/iv_tail"
+        app:bootstrapBrand="danger"
+        app:bootstrapSize="sm"
+        app:buttonMode="regular"
+        app:showOutline="false"
+        app:roundedCorners="true"
+        />
+</RelativeLayout>
