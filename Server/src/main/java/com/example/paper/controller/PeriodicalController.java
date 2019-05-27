@@ -31,14 +31,14 @@ public class PeriodicalController {
         return periodicalService.getPeriodicalsByUserName(username);
     }
 
-    @PostMapping(value = "/addToUser")
-    public BasicResponse addPeriodicalToUser(@RequestBody PeriodicalToUserParam param){
-        return periodicalService.addPeriodicalToUser(param.getPeriodicalId(),param.getUsername());
+    @GetMapping(value = "/addToUser")
+    public BasicResponse addPeriodicalToUser(@RequestParam(value="periodicalId")int periodicalId,@RequestParam(value="username")String username){
+        return periodicalService.addPeriodicalToUser(periodicalId,username);
     }
 
-    @PostMapping(value = "/deleteFromUser")
-    public BasicResponse deletePeriodicalToUser(@RequestBody PeriodicalToUserParam param){
-        return periodicalService.deletePeriodicalToUser(param.getPeriodicalId(),param.getUsername());
+    @GetMapping(value = "/deleteFromUser")
+    public BasicResponse deletePeriodicalToUser(@RequestParam(value="periodicalId")int periodicalId,@RequestParam(value="username")String username){
+        return periodicalService.deletePeriodicalToUser(periodicalId,username);
     }
 
     @GetMapping(value = "/getCount")

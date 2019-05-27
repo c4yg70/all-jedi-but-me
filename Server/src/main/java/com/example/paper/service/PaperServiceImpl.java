@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PaperServiceImpl implements PaperService {
@@ -25,17 +26,18 @@ public class PaperServiceImpl implements PaperService {
     public List<PaperVO> getAllPapers(){
         List<Paper> papers = paperRepo.findAll();
         List<PaperVO> paperVOS = new ArrayList<>();
-        for(int i=0;i<papers.size();i++){
-            paperVOS.add(new PaperVO(papers.get(i)));
+        for (Paper paper : papers) {
+            paperVOS.add(new PaperVO(paper));
         }
         return paperVOS;
     }
 
     @Override
     public PaperVO getPaperById(int paperId){
-        Paper paper = null;
-        if(paperRepo.findById(paperId).isPresent()){
-            paper = paperRepo.findById(paperId).get();
+        Paper paper;
+        Optional<Paper> paperOptional = paperRepo.findById(paperId);
+        if(paperOptional.isPresent()){
+            paper = paperOptional.get();
             return new PaperVO(paper);
         }else {
             return null;
@@ -44,8 +46,9 @@ public class PaperServiceImpl implements PaperService {
 
     @Override
     public BasicResponse addPageviews(int paperId){
-        if(statisticsRepo.findById(paperId).isPresent()){
-            Statistics statistics = statisticsRepo.findById(paperId).get();
+        Optional<Statistics> statisticsOptional = statisticsRepo.findById(paperId);
+        if(statisticsOptional.isPresent()){
+            Statistics statistics = statisticsOptional.get();
             statistics.setPageviews(statistics.getPageviews()+1);
             statisticsRepo.save(statistics);
             return new BasicResponse(true,"");
@@ -72,18 +75,18 @@ public class PaperServiceImpl implements PaperService {
         }
         List<PaperSimpleInfoVO> paperSimpleInfoVOS = new ArrayList<>();
         for(int i=0;i<10;i++){
-            Paper paper = paperRepo.findById(statistics[i].getPaperId()).get();
-            paperSimpleInfoVOS.add(paper.getPaperSimpleInfoVO());
+            Optional<Paper> paperOptional = paperRepo.findById(statistics[i].getPaperId());
+            if(paperOptional.isPresent()) {
+                Paper paper = paperOptional.get();
+                paperSimpleInfoVOS.add(paper.getPaperSimpleInfoVO());
+            }
         }
         return paperSimpleInfoVOS;
     }
 
     @Override
     public String getDownloadUrl(int paperId){
-        if(paperRepo.findById(paperId).isPresent()){
-            return paperRepo.findById(paperId).get().getDownloadUrl();
-        }else {
-            return null;
-        }
+        Optional<Paper> paperOptional = paperRepo.findById(paperId);
+        return paperOptional.map(Paper::getDownloadUrl).orElse(null);
     }
 }

@@ -29,14 +29,6 @@ public class PaperInit implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         if(paperRepo.count() == 0) {
             String separator = System.getProperty("file.separator");
-//            String path = "src" + separator
-//                    + "main" + separator
-//                    + "java" + separator
-//                    + "com" + separator
-//                    + "example" + separator
-//                    + "paper" + separator
-//                    + "new_paper_info.xlsx";
-//            String path = "/root/new_paper_info.xlsx";
             String path = separator + "root"
                     + separator + "paper"
                     + separator + "data"
@@ -98,7 +90,26 @@ public class PaperInit implements ApplicationRunner {
                 paperRepo.save(paper);
                 statisticsRepo.save(new Statistics(id));
             }
-            System.out.println("初始化数据完成！");
+            Statistics statistics = statisticsRepo.findById(5).get();
+            statistics.setPageviews(453);
+            statistics = statisticsRepo.findById(9).get();
+            statistics.setPageviews(500);
+            statistics = statisticsRepo.findById(11).get();
+            statistics.setPageviews(453);
+            statistics = statisticsRepo.findById(13).get();
+            statistics.setPageviews(234);
+            statistics = statisticsRepo.findById(16).get();
+            statistics.setPageviews(1000);
+            statistics = statisticsRepo.findById(18).get();
+            statistics.setPageviews(4354);
+            statistics = statisticsRepo.findById(21).get();
+            statistics.setPageviews(45343);
+            statistics = statisticsRepo.findById(22).get();
+            statistics.setPageviews(522);
+            statistics = statisticsRepo.findById(47).get();
+            statistics.setPageviews(52000);
+            statistics = statisticsRepo.findById(79).get();
+            statistics.setPageviews(32000);
         }
     }
 }

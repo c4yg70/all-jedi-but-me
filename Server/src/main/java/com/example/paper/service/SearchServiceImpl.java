@@ -19,8 +19,8 @@ public class SearchServiceImpl implements SearchService {
     public List<PaperVO> getPapersBySource(String source){
         List<Paper> papers = paperRepo.findPaperBySource(source);
         List<PaperVO> paperVOS = new ArrayList<>();
-        for(int i=0;i<papers.size();i++){
-            paperVOS.add(new PaperVO(papers.get(i)));
+        for (Paper paper : papers) {
+            paperVOS.add(new PaperVO(paper));
         }
         return paperVOS;
     }
@@ -29,12 +29,11 @@ public class SearchServiceImpl implements SearchService {
     public List<PaperVO> getPapersByKeyword(String keyword){
         List<Paper> papers = paperRepo.findAll();
         List<PaperVO> paperVOS = new ArrayList<>();
-        for(int i=0;i<papers.size();i++){
-            Paper paper = papers.get(i);
+        for (Paper paper : papers) {
             String allKeywords = paper.getKeyword();
             String[] keywordList = allKeywords.split(";;");
-            for(int j=0;j<keywordList.length;j++){
-                if(keywordList[j].equals(keyword)){
+            for (String aKeywordList : keywordList) {
+                if (aKeywordList.equals(keyword)) {
                     paperVOS.add(new PaperVO(paper));
                 }
             }

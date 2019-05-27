@@ -1,7 +1,6 @@
 package com.example.paper.controller;
 
 import com.example.paper.bl.PaperListService;
-import com.example.paper.parameter.PaperToPaperListParam;
 import com.example.paper.response.BasicResponse;
 import com.example.paper.response.PaperSimpleInfoVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +15,14 @@ public class PaperListController {
     @Autowired
     private PaperListService paperListService;
 
-    @PostMapping(value = "/addPaperToList")
-    public BasicResponse addPaperToList(@RequestBody PaperToPaperListParam param){
-        return paperListService.addPaperToList(param.getPaperId(),param.getUsername());
+    @GetMapping(value = "/addPaperToList")
+    public BasicResponse addPaperToList(@RequestParam(value="paperId")int paperId,@RequestParam(value="username")String username){
+        return paperListService.addPaperToList(paperId,username);
     }
 
-    @PostMapping(value = "/deletePaperFromList")
-    public BasicResponse deletePaperFromList(@RequestBody PaperToPaperListParam param){
-        return paperListService.deletePaperFromList(param.getPaperId(),param.getUsername());
+    @GetMapping(value = "/deletePaperFromList")
+    public BasicResponse deletePaperFromList(@RequestParam(value="paperId")int paperId,@RequestParam(value="username")String username){
+        return paperListService.deletePaperFromList(paperId,username);
     }
 
     @GetMapping(value = "/getTargetPaperList")

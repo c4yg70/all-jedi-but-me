@@ -7,6 +7,8 @@ import com.example.paper.response.BasicResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class LoginServiceImpl implements LoginService {
     @Autowired
@@ -25,8 +27,9 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public BasicResponse userLogin(String username, String password){
-        if(userRepo.findById(username).isPresent()){
-            User user = userRepo.findById(username).get();
+        Optional<User> userOptional = userRepo.findById(username);
+        if(userOptional.isPresent()){
+            User user = userOptional.get();
             if(user.getPassword().equals(password)){
                 return new BasicResponse(true,"");
             }else {

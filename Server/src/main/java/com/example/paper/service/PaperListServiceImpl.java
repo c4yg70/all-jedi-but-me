@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PaperListServiceImpl implements PaperListService {
@@ -22,8 +24,9 @@ public class PaperListServiceImpl implements PaperListService {
 
     @Override
     public BasicResponse addPaperToList(int paperId, String username){
-        if(userRepo.findById(username).isPresent()) {
-            User user = userRepo.findById(username).get();
+        Optional<User> userOptional = userRepo.findById(username);
+        if(userOptional.isPresent()) {
+            User user = userOptional.get();
             if(user.addPaper(paperId)){
                 userRepo.save(user);
                 return new BasicResponse(true,"");
@@ -37,8 +40,9 @@ public class PaperListServiceImpl implements PaperListService {
 
     @Override
     public BasicResponse deletePaperFromList(int paperId, String username){
-        if(userRepo.findById(username).isPresent()) {
-            User user = userRepo.findById(username).get();
+        Optional<User> userOptional = userRepo.findById(username);
+        if(userOptional.isPresent()) {
+            User user = userOptional.get();
             if(user.deletePaper(paperId)){
                 userRepo.save(user);
                 return new BasicResponse(true,"");
@@ -52,26 +56,29 @@ public class PaperListServiceImpl implements PaperListService {
 
     @Override
     public List<PaperSimpleInfoVO> getPaperListByUserName(String username){
-        if(userRepo.findById(username).isPresent()) {
+        Optional<User> userOptional = userRepo.findById(username);
+        if(userOptional.isPresent()) {
             List<PaperSimpleInfoVO> paperSimpleInfoVOS = new ArrayList<>();
-            User user = userRepo.findById(username).get();
+            User user = userOptional.get();
             ArrayList<Integer> paperIdList = user.getPaperIdList();
-            for(int i=0;i<paperIdList.size();i++){
-                if(paperRepo.findById(paperIdList.get(i)).isPresent()){
-                    Paper paper = paperRepo.findById(paperIdList.get(i)).get();
+            for (Integer aPaperIdList : paperIdList) {
+                Optional<Paper> paperOptional = paperRepo.findById(aPaperIdList);
+                if (paperOptional.isPresent()) {
+                    Paper paper = paperOptional.get();
                     paperSimpleInfoVOS.add(paper.getPaperSimpleInfoVO());
                 }
             }
             return paperSimpleInfoVOS;
         }else {
-            return null;
+            return Collections.emptyList();
         }
     }
 
     @Override
     public int getPaperListCount(String username){
-        if(userRepo.findById(username).isPresent()) {
-            User user = userRepo.findById(username).get();
+        Optional<User> userOptional = userRepo.findById(username);
+        if(userOptional.isPresent()) {
+            User user = userOptional.get();
             return user.getPaperIdList().size();
         }else {
             return 0;

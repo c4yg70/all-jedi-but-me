@@ -21,10 +21,8 @@ import org.apache.mahout.cf.taste.recommender.*;
 import org.apache.mahout.cf.taste.similarity.*;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.logging.Logger;
 
 @Service
 public class PeriodicalServiceImpl implements PeriodicalService {
@@ -33,16 +31,16 @@ public class PeriodicalServiceImpl implements PeriodicalService {
     @Autowired
     private UserRepo userRepo;
 
-    private final static int NEIGHBORHOOD_NUM = 2;
-    private final static int RECOMMENDER_NUM = 3;
+    private static final int NEIGHBORHOOD_NUM = 2;
+    private static final int RECOMMENDER_NUM = 3;
 
     @Override
     public List<String> getAllCategories(){
         List<Periodical> periodicalList = periodicalRepo.findAll();
         List<String> categories = new ArrayList<>();
-        for(int i=0;i<periodicalList.size();i++){
-            String category = periodicalList.get(i).getCategory();
-            if(!categories.contains(category)) {
+        for (Periodical aPeriodicalList : periodicalList) {
+            String category = aPeriodicalList.getCategory();
+            if (!categories.contains(category)) {
                 categories.add(category);
             }
         }
@@ -53,34 +51,37 @@ public class PeriodicalServiceImpl implements PeriodicalService {
     public List<PeriodicalVO> getPeriodicalsByCategory(String category){
         List<Periodical> periodicalList = periodicalRepo.findPeriodicalByCategory(category);
         List<PeriodicalVO> periodicalVOS = new ArrayList<>();
-        for(int i=0;i<periodicalList.size();i++){
-            periodicalVOS.add(new PeriodicalVO(periodicalList.get(i)));
+        for (Periodical aPeriodicalList : periodicalList) {
+            periodicalVOS.add(new PeriodicalVO(aPeriodicalList));
         }
         return periodicalVOS;
     }
 
     @Override
     public List<PeriodicalVO> getPeriodicalsByUserName(String username){
-        if(userRepo.findById(username).isPresent()) {
+        Optional<User> userOptional = userRepo.findById(username);
+        if(userOptional.isPresent()) {
             List<PeriodicalVO> periodicalVOS = new ArrayList<>();
-            User user = userRepo.findById(username).get();
+            User user = userOptional.get();
             ArrayList<Integer> periodicalIdList = user.getPeriodicalIdList();
-            for(int i=0;i<periodicalIdList.size();i++){
-                if(periodicalRepo.findById(periodicalIdList.get(i)).isPresent()){
-                    Periodical periodical = periodicalRepo.findById(periodicalIdList.get(i)).get();
+            for (Integer aPeriodicalIdList : periodicalIdList) {
+                Optional<Periodical> periodicalOptional = periodicalRepo.findById(aPeriodicalIdList);
+                if (periodicalOptional.isPresent()) {
+                    Periodical periodical = periodicalOptional.get();
                     periodicalVOS.add(new PeriodicalVO(periodical));
                 }
             }
             return periodicalVOS;
         }else {
-            return null;
+            return Collections.emptyList();
         }
     }
 
     @Override
     public BasicResponse addPeriodicalToUser(int periodicalId, String username){
-        if(userRepo.findById(username).isPresent()){
-            User user = userRepo.findById(username).get();
+        Optional<User> userOptional = userRepo.findById(username);
+        if(userOptional.isPresent()){
+            User user = userOptional.get();
             if(user.addPeriodical(periodicalId)){
                 userRepo.save(user);
                 return new BasicResponse(true,"");
@@ -94,8 +95,9 @@ public class PeriodicalServiceImpl implements PeriodicalService {
 
     @Override
     public BasicResponse deletePeriodicalToUser(int periodicalId, String username){
-        if(userRepo.findById(username).isPresent()){
-            User user = userRepo.findById(username).get();
+        Optional<User> userOptional = userRepo.findById(username);
+        if(userOptional.isPresent()){
+            User user = userOptional.get();
             if(user.deletePeriodical(periodicalId)){
                 userRepo.save(user);
                 return new BasicResponse(true,"");
@@ -109,8 +111,9 @@ public class PeriodicalServiceImpl implements PeriodicalService {
 
     @Override
     public int getPeriodicalCount(String username){
-        if(userRepo.findById(username).isPresent()) {
-            User user = userRepo.findById(username).get();
+        Optional<User> userOptional = userRepo.findById(username);
+        if(userOptional.isPresent()) {
+            User user = userOptional.get();
             return user.getPeriodicalIdList().size();
         }else {
             return 0;
@@ -121,33 +124,31 @@ public class PeriodicalServiceImpl implements PeriodicalService {
     public List<PeriodicalVO> recommend(String username){
         List<PeriodicalVO> periodicalVOS = new ArrayList<>();
         //csv文件生成
-        LinkedHashMap map = new LinkedHashMap();
+        LinkedHashMap<String,String> map = new LinkedHashMap();
         map.put("1", "用户ID");
         map.put("2", "期刊ID");
         map.put("3", "是否订阅");
         List exportData = new ArrayList<Map>();
-        Map row1;
+        LinkedHashMap<String,String> row1;
         List<User> userList = userRepo.findAll();
         List<String> userIds = new ArrayList<>();
-        for(int i=0;i<userList.size();i++){
-            userIds.add(userList.get(i).getUsername());
+        for (User anUserList : userList) {
+            userIds.add(anUserList.getUsername());
         }
-        System.out.println(userIds.indexOf(username));
         for(int i=0;i<userList.size();i++){
             User user = userList.get(i);
             if(!user.getPeriodicalIds().equals("")) {
                 String[] periodicalIds = user.getPeriodicalIds().split(",");
-                for(int j=0;j<periodicalIds.length;j++){
-                    row1 = new LinkedHashMap<String, String>();
-                    row1.put("1",i+"");
-                    row1.put("2",periodicalIds[j]+"");
-                    row1.put("3","5.0");
+                for (String periodicalId : periodicalIds) {
+                    row1 = new LinkedHashMap();
+                    row1.put("1", i + "");
+                    row1.put("2", periodicalId + "");
+                    row1.put("3", "5.0");
                     exportData.add(row1);
                 }
             }
 
         }
-//        String path = "D:/test_maven/";
         String path = "/root/data/";
         String fileName ="CSV文件生成";
         File file = CSVUtils.createCSVFile(exportData, map, path, fileName);
@@ -162,20 +163,20 @@ public class PeriodicalServiceImpl implements PeriodicalService {
             while (iter.hasNext()) {
                 long uid = iter.next();
                 List<RecommendedItem> list = r.recommend(uid, RECOMMENDER_NUM);
-                System.out.printf("uid:%s", uid);
                 if((int)uid == userIds.indexOf(username)){
                     for (RecommendedItem ritem : list) {
-                        System.out.printf("(%s,%f)", ritem.getItemID(), ritem.getValue());
                         int itemId = (int) ritem.getItemID();
-                        Periodical periodical = periodicalRepo.findById(itemId).get();
-                        periodicalVOS.add(new PeriodicalVO(periodical));
+                        Optional<Periodical> periodicalOptional = periodicalRepo.findById(itemId);
+                        if(periodicalOptional.isPresent()) {
+                            Periodical periodical = periodicalOptional.get();
+                            periodicalVOS.add(new PeriodicalVO(periodical));
+                        }
                     }
                 }
             }
             return periodicalVOS;
         }catch (Exception e){
-            e.printStackTrace();
-            return null;
+            return Collections.emptyList();
         }
     }
 }
